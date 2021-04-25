@@ -1,0 +1,184 @@
+package model;
+import java.sql.*;
+public class FundedProjects
+{ 		//A common method to connect to the DB
+	private Connection connect()
+	{
+		Connection con = null;
+		
+		try
+		{
+			Class.forName("com.mysql.jdbc.Driver");
+			
+			//Provide the correct details: DBServer/DBName, username, password
+			con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/paf13.2", "root", "");
+		}
+		catch (Exception e)
+		{e.printStackTrace();}
+		return con;
+	}
+	
+	public String insertItem(String name, String price, String desc)
+	{
+		String output = "";
+		
+		try
+		{
+			Connection con = connect();
+			
+			if (con == null)
+			{return "Error while connecting to the database for inserting."; }
+			// create a prepared statement
+			String query = " insert into items (`projectID`,`projectName`,`projectPrice`,`projectDesc`)"
+					+ " values (?, ?, ?, ?)";
+			PreparedStatement preparedStmt = con.prepareStatement(query);
+
+			// binding values
+			preparedStmt.setInt(1, 0);
+			preparedStmt.setString(2, name);
+			preparedStmt.setDouble(3, Double.parseDouble(price));
+			preparedStmt.setString(4, desc);
+			
+			
+			// execute the statement
+			 preparedStmt.execute(); 
+			 con.close(); 
+			 output = "Inserted successfully"; 
+			 } 
+		catch (Exception e) 
+		{ 
+			 output = "Error while inserting the item."; 
+			 System.err.println(e.getMessage()); 
+		} 
+		return output; 
+	} 
+			
+	public String readItems() 
+	{ 
+		String output = ""; 
+		
+		try
+		{ 
+			 Connection con = connect(); 
+			 
+			 if (con == null) 
+			 {
+				 return "Error while connecting to the database for reading."; 
+			 } 
+			 
+			 // Prepare the html table to be displayed
+			 output = "<table border='1'><tr><th>Project ID</th><th>Project Name</th>" +
+			 "<th>Ptroject Price</th>" + 
+			 "<th>Project Description</th></tr>";
+			 
+			 
+			 String query = "select * from items"; 
+			 Statement stmt = con.createStatement(); 
+			 ResultSet rs = stmt.executeQuery(query); 
+			 
+			 // iterate through the rows in the result set
+			 while (rs.next()) 
+			 { 
+				 String projectID = Integer.toString(rs.getInt("projectID")); 
+				 String projectName = rs.getString("projectName"); 
+				 String projectPrice = Double.toString(rs.getDouble("projectPrice")); 
+				 String projectDesc = rs.getString("projectDesc"); 
+			 
+				 // Add into the html table
+				 output += "<tr><td>" + projectID + "</td>"; 
+				 output += "<td>" + projectName + "</td>"; 
+				 output += "<td>" + projectPrice + "</td>"; 
+				 output += "<td>" + projectDesc + "</td>"; 
+				 
+				 // buttons
+				 /*output += "<td><input name='btnUpdate' type='button' value='Update' class='btn btn-secondary'></td>"
+						 + "<td><form method='post' action='items.jsp'>" + "<input name='btnRemove' type='submit' value='Remove' class='btn btn-danger'>"
+						 + "<input name='itemID' type='hidden' value='" + itemID 
+			 + "'>" + "</form></td></tr>"; */
+			 } 
+			 con.close(); 
+			 // Complete the html table
+			 output += "</table>"; 
+		} 
+		catch (Exception e) 
+		{ 
+			 output = "Error while reading the items."; 
+			 System.err.println(e.getMessage()); 
+		} 
+		return output; 
+	} 
+			
+	public String updateItem(String ID, String name, String price, String desc)
+	{ 
+		String output = ""; 
+		
+		try
+		{ 
+			Connection con = connect(); 
+		
+			if (con == null) 
+			{
+				return "Error while connecting to the database for updating."; 
+			} 
+			
+			 // create a prepared statement
+			 String query = "UPDATE items SET projectName=?,projectPrice=?,projectDesc=? WHERE projectID=?"; 
+			 
+			 PreparedStatement preparedStmt = con.prepareStatement(query); 
+			 
+			 // binding values
+			 preparedStmt.setString(1, name); 
+			 preparedStmt.setDouble(2, Double.parseDouble(price)); 
+			 preparedStmt.setString(3, desc); 
+			 preparedStmt.setInt(4, Integer.parseInt(ID)); 
+			 
+			 // execute the statement
+			 preparedStmt.execute(); 
+			 con.close(); 
+			 
+			 output = "Updated successfully"; 
+		} 
+		catch (Exception e) 
+		{ 
+			 output = "Error while updating the item."; 
+			 System.err.println(e.getMessage()); 
+		}
+		
+		return output; 
+	} 
+			
+	public String deleteItem(String id) 
+	{ 
+		String output = ""; 
+		
+		try
+		{ 
+			 Connection con = connect(); 
+			 
+			 if (con == null) 
+			 {
+				 return "Error while connecting to the database for deleting."; 
+			 } 
+			 
+			 // create a prepared statement
+			 String query = "delete from items where projectID=?"; 
+			 
+			 PreparedStatement preparedStmt = con.prepareStatement(query); 
+			 
+			 // binding values
+			 preparedStmt.setInt(1, Integer.parseInt(id)); 
+			 
+			 // execute the statement
+			 preparedStmt.execute(); 
+			 con.close(); 
+			 output = "Deleted successfully"; 
+		} 
+		catch (Exception e) 
+		{ 
+			 output = "Error while deleting the item."; 
+			 System.err.println(e.getMessage()); 
+		} 
+		
+		return output; 
+	} 
+} 
